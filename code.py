@@ -19,7 +19,6 @@ from adafruit_featherwing import minitft_featherwing
 from adafruit_hid.gamepad import Gamepad
 from adafruit_display_text import label
 from adafruit_display_shapes.rect import Rect
-from adafruit_display_shapes.circle import Circle
 from adafruit_display_shapes.triangle import Triangle
 from adafruit_display_shapes.polygon import Polygon
 import displayio

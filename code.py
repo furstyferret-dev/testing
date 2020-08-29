@@ -1,12 +1,29 @@
+# This is a sample program to demonstrate features of the 
+# Adafruit Mini TFT Featherwing and nRF52840 Feather.  
+
+# While running it presents itself as a USB gamepad to a 
+# connected computer, while displaying button state on the LCD. 
+# It has two modes, switched using button A. 
+
+# Mode 1: Up and Down alter the brightness of the built-in
+# NeoPixel on the Feather. Left and Right cycle through a colour
+# wheel.
+
+# Mode 2: Up/Down/Left/Right directly control a virtual joystick.
+# Button B toggles display of the actual position of the 
+# joystick being sent to the computer.
+
 import time
 import neopixel
 from adafruit_featherwing import minitft_featherwing
 from adafruit_hid.gamepad import Gamepad
+from adafruit_display_text import label
 from adafruit_display_shapes.rect import Rect
 from adafruit_display_shapes.circle import Circle
 from adafruit_display_shapes.triangle import Triangle
 from adafruit_display_shapes.polygon import Polygon
 import displayio
+import terminalio
 import usb_hid
 import board
 
@@ -15,6 +32,7 @@ gp = Gamepad(usb_hid.devices)
 display = minitft.display
 
 joystick_mode = False
+show_coordinates = False
 joy_y = 0
 joy_x = 0
 delta = -6          # Change to joystick position for each button press
@@ -45,6 +63,8 @@ points_abs = [ (102, 41), (114, 41), (108, 41), (108, 35), (108, 47), (108, 41),
 joystick_zero = Polygon(points_abs, outline=0xA9A9A9)
 joystick_pointer = Polygon(points, outline=0xFFFFFF)
 pointer_background = Rect(83, 10, 50, 60, fill=0x404040, outline=0xA9A9A9, stroke=1)
+position_text = label.Label(terminalio.FONT, x=112, y=53, color=0xBEBEBE, 
+                    max_glyphs=10, background_color=0x404040, line_spacing=0.8)
 
 canvas.append(up)
 canvas.append(down)
@@ -57,6 +77,7 @@ canvas.append(select)
 ### ONLY FOR JOYSTICK SIMULATION
 scale.append(pointer_background)
 scale.append(joystick_zero)
+scale.append(position_text)
 pointer.append(joystick_pointer)
 
 canvas.append(scale)
@@ -132,11 +153,18 @@ while True:
                 if joystick_mode:
                     joystick_pointer.outline = 0xFF00FF
                     pointer_background.outline = 0xFF00FF
+                    position_text.color=0xFF00FF
+
                 else:
                     joystick_pointer.outline = 0xA9A9A9
                     pointer_background.outline = 0xA9A9A9
+                    position_text.color=0xBEBEBE
                 ### inhibit changes for a short period
                 time.sleep(0.3)
+
+            if buttons.b:
+                show_coordinates = not show_coordinates
+                time.sleep(0.3)    
 
             if joystick_mode:
                 gp.press_buttons(gamepad_button_num)
@@ -170,6 +198,12 @@ while True:
     display_pos = map_joystick_pointer(joy_x, joy_y)
     pointer.x = int(display_pos[0])
     pointer.y = int(display_pos[1])
+    if show_coordinates:
+        position_text.text = str(int(joy_x)) + "\n" + str(int(joy_y))
+    else:
+        position_text.text = ''
+    position_text.x = int(display_pos[0] + 10)
+    position_text.y = int(display_pos[1] + 18)
     
     # Neopixel housekeeping
     pixel[0] = wheel(pixel_index & 255)

@@ -44,9 +44,12 @@ pixel = neopixel.NeoPixel(
 pixel_index = 0
 
 canvas = displayio.Group(max_size=25)
+button_group = displayio.Group(max_size=10)
 scale = displayio.Group(max_size=5)
 pointer = displayio.Group(max_size=2, x=102, y=35)
 display.show(canvas)
+
+background = Rect(0, 0, 160, 80, fill=0x404040)
 
 select = Rect(25, 28, 23, 23, fill=0x0, outline=0xFFFFFF, stroke=1)
 up = Triangle(25, 23, 35, 7, 47, 23, fill=0x0, outline=0xFFFFFF)
@@ -61,17 +64,17 @@ points = [ (0, 6), (12, 6), (6, 6), (6, 0), (6, 12), (6, 6), ]
 points_abs = [ (102, 41), (114, 41), (108, 41), (108, 35), (108, 47), (108, 41), ]
 joystick_zero = Polygon(points_abs, outline=0xA9A9A9)
 joystick_pointer = Polygon(points, outline=0xFFFFFF)
-pointer_background = Rect(83, 10, 50, 60, fill=0x404040, outline=0xA9A9A9, stroke=1)
+pointer_background = Rect(83, 10, 50, 60, fill=0x202020, outline=0xA9A9A9, stroke=1)
 position_text = label.Label(terminalio.FONT, x=112, y=53, color=0xBEBEBE, 
-                    max_glyphs=10, background_color=0x404040, line_spacing=0.8)
+                    max_glyphs=10, background_color=0x202020, line_spacing=0.8)
 
-canvas.append(up)
-canvas.append(down)
-canvas.append(left)
-canvas.append(right)
-canvas.append(a)
-canvas.append(b)
-canvas.append(select)
+button_group.append(up)
+button_group.append(down)
+button_group.append(left)
+button_group.append(right)
+button_group.append(a)
+button_group.append(b)
+button_group.append(select)
 
 ### ONLY FOR JOYSTICK SIMULATION
 scale.append(pointer_background)
@@ -79,6 +82,8 @@ scale.append(joystick_zero)
 scale.append(position_text)
 pointer.append(joystick_pointer)
 
+canvas.append(background)
+canvas.append(button_group)
 canvas.append(scale)
 scale.append(pointer)
 
@@ -139,12 +144,12 @@ while True:
     for i, button in enumerate(buttons):
         gamepad_button_num = i + 1
         if not button:
-            shape = canvas[i]
-            shape.fill=0x707070
+            shape = button_group[i]
+            shape.fill=0x0
             gp.release_buttons(gamepad_button_num)
 
         else:
-            shape = canvas[i]
+            shape = button_group[i]
             shape.fill=0xFF00FF
 
             if buttons.a:
